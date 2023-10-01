@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Points System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        input, button {
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Points System</h1>
+
+<form id="pointsForm">
+    <label for="action">Choose an action:</label>
+    <select id="action" name="action">
+        <option value="add">Add Player</option>
+        <option value="addPoints">Add Points</option>
+        <option value="removePoints">Remove Points</option>
+        <option value="displayLeaderboard">Display Leaderboard</option>
+    </select>
+    <br>
+
+    <label for="playerName">Player Name:</label>
+    <input type="text" id="playerName" name="playerName">
+    <br>
+
+    <label for="points">Points:</label>
+    <input type="text" id="points" name="points">
+    <br>
+
+    <button type="button" onclick="performAction()">Submit</button>
+</form>
+
+<div id="leaderboard"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-7Mq8lQ05iqtZ3+RnAE5R5fTdr2KkNl2Rl6aPH0gPzg=" crossorigin="anonymous"></script>
+<script src="https://cdn.socket.io/4.1.3/socket.io.min.js" integrity="sha256-d27znuSKZMkziAxFsoOuj6I8WkysT5s90o0JlHDM8j0=" crossorigin="anonymous"></script>
+<script>
+    var players = []; // Array to store player information
+
+    function performAction() {
+        var action = document.getElementById("action").value;
+        var playerName = document.getElementById("playerName").value;
+        var points = parseInt(document.getElementById("points").value);
+
+        switch (action) {
+            case "add":
+                players.push({ name: playerName, points: 0 });
+                break;
+            case "addPoints":
+                var player = getPlayer(playerName);
+                if (player) {
+                    player.points += points;
+                }
+                break;
+            case "removePoints":
+                var player = getPlayer(playerName);
+                if (player) {
+                    player.points -= points;
+                    // Ensure points don't go below zero
+                    if (player.points < 0) {
+                        player.points = 0;
+                    }
+                }
+                break;
+            case "displayLeaderboard":
+                displayLeaderboard();
+                break;
+            default:
+                console.log("Invalid action.");
+        }
+
+        // Clear the form inputs
+        document.getElementById("playerName").value = "";
+        document.getElementById("points").value = "";
+
+        // Display the updated leaderboard
+        displayLeaderboard();
+    }
+
+    function getPlayer(playerName) {
+        return players.find(function(player) {
+            return player.name === playerName;
+        });
+    }
+
+    function displayLeaderboard() {
+        var leaderboard = "<h2>Leaderboard</h2><table><tr><th>Player</th><th>Points</th></tr>";
+
+        players.sort(function(a, b) {
+            return b.points - a.points;
+        });
+
+        players.forEach(function(player) {
+            leaderboard += "<tr><td>" + player.name + "</td><td>" + player.points + "</td></tr>";
+        });
+
+        leaderboard += "</table>";
+        document.getElementById("leaderboard").innerHTML = leaderboard;
+    }
+</script>
+
+</body>
+</html>
